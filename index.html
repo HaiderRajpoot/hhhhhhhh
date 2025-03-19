@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Forex Funding</title>
+    <meta name="description" content="A professional forex funding platform with cryptocurrency payment integration" />
+    <meta name="author" content="My Forex Funding" />
+    <meta property="og:image" content="/og-image.png" />
+    <!-- Handle redirect from 404.html -->
+    <script>
+      // Handle redirect from 404.html
+      (function() {
+        // Parse the URL
+        var location = window.location;
+        var search = location.search;
+        var redirectParam = new URLSearchParams(search).get('redirect');
+        
+        // If we have a redirect parameter, replace the URL with the correct path
+        if (redirectParam) {
+          // Decode the path
+          var decodedPath = decodeURIComponent(redirectParam);
+          
+          // Use history API to replace the URL without reloading the page
+          window.history.replaceState(null, null, decodedPath);
+          
+          console.log('Redirected from 404.html to:', decodedPath);
+        }
+      })();
+    </script>
+    <script src="/check-routing.js"></script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

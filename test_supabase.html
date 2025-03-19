@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supabase Buying Activity Test</title>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, button {
+      padding: 8px;
+      width: 100%;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+    .error {
+      color: red;
+    }
+    .success {
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Supabase Buying Activity Test</h1>
+    
+    <div class="card">
+      <h2>Configuration</h2>
+      <div class="form-group">
+        <label for="supabaseUrl">Supabase URL</label>
+        <input type="text" id="supabaseUrl" placeholder="https://your-project.supabase.co">
+      </div>
+      <div class="form-group">
+        <label for="supabaseKey">Supabase Anon Key</label>
+        <input type="text" id="supabaseKey" placeholder="your-anon-key">
+      </div>
+      <button id="initButton">Initialize Supabase</button>
+    </div>
+    
+    <div class="card">
+      <h2>Test Buying Activity</h2>
+      <div class="form-group">
+        <label for="userEmail">User Email</label>
+        <input type="email" id="userEmail" placeholder="user@example.com">
+      </div>
+      <button id="testButton" disabled>Test Buying Activity</button>
+    </div>
+    
+    <div class="card">
+      <h2>Results</h2>
+      <pre id="results">No results yet</pre>
+    </div>
+  </div>
+
+  <script>
+    let supabase = null;
+    
+    document.getElementById('initButton').addEventListener('click', async () => {
+      const supabaseUrl = document.getElementById('supabaseUrl').value;
+      const supabaseKey = document.getElementById('supabaseKey').value;
+      
+      if (!supabaseUrl || !supabaseKey) {
+        showResult('Please enter Supabase URL and Anon Key', true);
+        return;
+      }
+      
+      try {
+        // Initialize Supabase client
+        supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // Test connection
+        const { data, error } = await supabase.from('buying_activities').select('count(*)');
+        
+        if (error) {
+          throw error;
+        }
+        
+        showResult(`Supabase initialized successfully! Found ${data[0]?.count || 0} buying activities.`);
+        document.getElementById('testButton').disabled = false;
+      } catch (error) {
+        showResult(`Error initializing Supabase: ${error.message}`, true);
+      }
+    });
+    
+    document.getElementById('testButton').addEventListener('click', async () => {
+      const userEmail = document.getElementById('userEmail').value;
+      
+      if (!userEmail) {
+        showResult('Please enter a user email', true);
+        return;
+      }
+      
+      try {
+        // Insert test buying activity
+        const { data, error } = await supabase
+          .from('buying_activities')
+          .insert({
+            user_email: userEmail,
+            challenge_name: 'HTML Test Challenge',
+            account_size: '$10,000',
+            amount: 100,
+            currency: 'USDT',
+            wallet_address: '0xHTMLTestWalletAddress',
+            payment_id: `html-test-${Date.now()}`,
+            status: 'pending',
+            metadata: {
+              timestamp: new Date().toISOString(),
+              ipAddress: '127.0.0.1',
+              userAgent: navigator.userAgent,
+              source: 'HTML Test'
+            }
+          })
+          .select();
+        
+        if (error) {
+          throw error;
+        }
+        
+        showResult(`Buying activity recorded successfully!\n\n${JSON.stringify(data, null, 2)}`);
+      } catch (error) {
+        showResult(`Error recording buying activity: ${error.message}`, true);
+      }
+    });
+    
+    function showResult(message, isError = false) {
+      const resultsElement = document.getElementById('results');
+      resultsElement.textContent = message;
+      resultsElement.className = isError ? 'error' : 'success';
+    }
+  </script>
+</body>
+</html> 
